@@ -1,0 +1,59 @@
+## template: jinja
+#cloud-config
+
+# Setup variables
+{%- set virtual_ipaddress = '10.0.0.200' -%}
+{%- set primary_node_label = 'ha-node-1' -%}
+{%- set auth_pass = 'supersecret123' -%}
+
+# Execute System Updates
+package_update: true
+package_upgrade: true
+
+# Install required packages
+packages:
+  - nginx
+  - keepalived
+
+# Configure packages
+runcmd:
+  - |
+    rm /var/www/html/index.nginx-debian.html
+
+    cat > /var/www/html/index.nginx-debian.html <<EOF
+    Hello from {{ds.meta_data.label}}
+    EOF
+
+    cat > /etc/keepalived/keepalived.conf <<EOF
+    vrrp_instance RouteServerPool {
+      state
+
+      {%- if ds.meta_data.label == primary_node_label %}
+      MASTER
+      {%- else %}
+      BACKUP
+      {%- endif %}
+
+      interface eth1
+      virtual_router_id 10
+      priority 
+      
+      {%- if ds.meta_data.label == primary_node_label %}
+      100
+      {%- else %}
+      99
+      {%- endif %}
+
+      advert_int 1
+      authentication {
+          auth_type PASS
+          auth_pass {{auth_pass}}
+      }
+      virtual_ipaddress {
+          {{virtual_ipaddress}}
+      }
+    }
+    EOF
+
+    systemctl enable keepalived
+    systemctl start keepalived

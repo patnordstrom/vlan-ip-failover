@@ -1,0 +1,21 @@
+## template: jinja
+#cloud-config
+
+# Setup variables
+{%- set virtual_ipaddress = '10.0.0.200' -%}
+
+# Deploy test script
+runcmd:
+  - |
+
+    cat > /tmp/ping_virtual_ip.sh <<'EOF'
+    end_time=600
+    while [ "$SECONDS" -lt "$end_time" ]; do
+      node_response=$(curl http://{{virtual_ipaddress}})
+      timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+      echo ${timestamp} ${node_response} >> ping_virtual_ip.log
+    sleep 1
+    done
+    EOF
+
+    chmod +x /tmp/ping_virtual_ip.sh
