@@ -1,1 +1,2 @@
 # vlan-ip-failover
+Provides an example for how to deploy highly available compute instances within your VLAN using keepalived on Akamai Connected Cloud.  You can find the related guide for this repo here: https://patnordstrom.medium.com/deploying-highly-available-compute-instances-in-your-akamai-connected-cloud-vlan-45d85e6a1b4d
